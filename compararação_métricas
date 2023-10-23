@@ -1,0 +1,139 @@
+import pandas as pd
+df=pd.read_csv('km_mean2.csv', delimiter=';')
+db=pd.read_csv('cv 2.csv',delimiter=';')
+
+##########################################################################################################
+# DBSCAN 
+##########################################################################################################
+from sklearn.metrics.cluster import silhouette_score
+from sklearn.cluster import DBSCAN
+'''labels = DBSCAN(eps=3, min_samples=2).fit_predict(df)
+
+db_index1 = calinski_harabasz_score(df, kmeans1.labels_)
+print(f"Calinski-Harabasz Index for 2 clusters: {db_index1}")
+
+'''
+
+import matplotlib.pyplot as plt
+from sklearn.cluster import DBSCAN
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+scaled_data = scaler.fit_transform(db)
+
+# Aplique o DBSCAN aos dados
+dbscan = DBSCAN(eps=1, min_samples=3)
+dbscan.fit(scaled_data)
+
+# Obtenha os rótulos de cluster atribuídos
+labels = dbscan.labels_
+
+# Adicione os rótulos de cluster de volta ao DataFrame
+db['Cluster'] = labels
+colors = ['blue', 'green', 'red', '0.6']
+db['Color'] = [colors[label] if label != -1 else 'purple' for label in labels]
+
+# Visualize os clusters usando um gráfico de dispersão
+plt.scatter(db['CV'], db['Mean'],  c=db['Color'], cmap='viridis')
+plt.title("Clusters gerados pelo DBSCAN")
+plt.xlabel("Média")
+plt.ylabel("Coeficiente de variação")
+plt.show()
+
+
+##########################################################################################################
+#Calinski Harabasz Score
+##########################################################################################################
+
+from sklearn.cluster import KMeans
+from sklearn.metrics import calinski_harabasz_score
+
+kmeans1 = KMeans(n_clusters=2, random_state=30)
+labels = kmeans1.fit_predict(df)
+db_index1 = calinski_harabasz_score(df, kmeans1.labels_)
+print(f"Calinski-Harabasz Index for 2 clusters: {db_index1}")
+
+kmeans2 = KMeans(n_clusters=3, random_state=30)
+labels = kmeans2.fit_predict(df)
+db_index2 = calinski_harabasz_score(df, kmeans2.labels_)
+print(f"Calinski-Harabasz Index for 3 clusters: {db_index2}")
+
+kmeans3 = KMeans(n_clusters=4, random_state=30)
+labels = kmeans3.fit_predict(df)
+db_index3 = calinski_harabasz_score(df, kmeans3.labels_)
+print(f"Calinski-Harabasz Index for 2 clusters: {db_index3}")
+
+#plot
+
+results = {}
+
+for i in range(2, 6):
+    kmeans = KMeans(n_clusters=i, random_state=30)
+    labels = kmeans.fit_predict(df)
+    db_index = calinski_harabasz_score(df, kmeans.labels_)
+    results.update({i: db_index})
+
+# Imprime os valores por pontos
+for num_clusters, db_index in results.items():
+    print(f'Clusters: {num_clusters}, Índice "Calinski-Harabasz" : {db_index}')
+
+plt.plot(range(1,5), list(results.values()))
+plt.scatter(range(1,5), list(results.values()), color='blue', marker='o')
+plt.xlabel("Número de clusters")
+plt.title('Índice "Calinski-Harabasz"')
+plt.show()
+
+##########################################################################################################
+#Davies bouldin Score
+##########################################################################################################
+
+from sklearn.metrics import davies_bouldin_score
+
+kmeans1 = KMeans(n_clusters=2, random_state=30)
+labels = kmeans1.fit_predict(df)
+db_index1 = davies_bouldin_score(df, kmeans1.labels_)
+print(f"Calinski-Harabasz Index for 2 clusters: {db_index1}")
+
+kmeans2 = KMeans(n_clusters=3, random_state=30)
+labels = kmeans2.fit_predict(df)
+db_index2 = davies_bouldin_score(df, kmeans2.labels_)
+print(f"Calinski-Harabasz Index for 3 clusters: {db_index2}")
+
+kmeans3 = KMeans(n_clusters=4, random_state=30)
+labels = kmeans3.fit_predict(df)
+db_index3 = davies_bouldin_score(df, kmeans3.labels_)
+print(f"Calinski-Harabasz Index for 2 clusters: {db_index3}")
+
+#Plot
+
+results = {}
+
+for i in range(2, 6):
+    kmeans = KMeans(n_clusters=i, random_state=30)
+    labels = kmeans.fit_predict(df)
+    db_index = davies_bouldin_score(df, kmeans.labels_)
+    results.update({i: db_index})
+
+# Imprime os valores por pontos
+for num_clusters, db_index in results.items():
+    print(f'Clusters: {num_clusters}, Índice "Davies Bouldin": {db_index}')
+
+plt.plot(range(1,5), list(results.values()))
+plt.scatter(range(1,5), list(results.values()), color='blue', marker='o')
+plt.xlabel("Número de clusters")
+plt.title('Índice "Davies Bouldin"')
+plt.show()
+
+##########################################################################################################
+#Hierchical Clustering
+##########################################################################################################
+
+data=list(zip(df['House'], df['Mean ']))
+print(data)
+
+from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.cluster import AgglomerativeClustering
+linkage_data = linkage(data, method='average', metric='euclidean')
+dendrogram(linkage_data)
+#plt.axvline(x=3,color='b',ls='-')
+plt.show()
